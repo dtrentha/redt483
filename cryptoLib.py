@@ -3,6 +3,7 @@
 import binascii
 import os
 
+
 def bitify(message, encoding='utf-8', errors='surrogatepass'):
     bits = bin(int(binascii.hexlify(message.encode(encoding, errors)), 16))[2:]
     return bits.zfill(8 * ((len(bits) + 7) // 8))
@@ -28,35 +29,58 @@ def blockify(message):
         message = message[128:]
     return blocks
 
+def deblockify(blocks):
+    message = ""
+    for i in blocks:
+        message += i
+    return message
+
 def padify(blocks):
+    need = 0
+    padding = 0
     for i in blocks:
         if len(i) < 128:
             tot = 128 - len(i)
-            tot = tot / 16
-            string = ("0" + str(tot)) * tot
-            newstr = bitify(string)
-            i += newstr
-            print(i)
-            return blocks
-    pad = bitify("0808080808080808")
-    blocks.append(pad)
-    return blocks
+            tot = tot / 8
+            padding = tot
+            need = 1
+    if need == 0:
+        pad = '{0:08b}'.format(16)
+        pad *= 16
+        blocks.append(pad)
+        return blocks
+    elif need == 1:
+        pad = '{0:08b}'.format(padding)
+        pad *= padding
+        blocks[-1] = blocks[-1] + pad
+        return blocks
+
+def depadify(blocks):
+    last = blocks[-1]
+    bits = last[-8:]
+    byte = int(bits,2)
+    #print(byte) 
+    if byte == 16:
+        blocks = blocks[:-1]
+        return blocks    
+    else:
+        trim = byte * 8
+        blocks[-1] = last[:-trim]
+        return blocks
 
 
-message1 = "hello my baby hello my darling hello my rag time gal when pizzas on a bagel you can eat pizza anytime"
+message1 = "when pizzas on a bagel you can eat pizza anytime"
 
 message2 = "abcafdsgdsgdsgdsa"
 
-newmess = bitify(message1)
-
-blocks = blockify(newmess)
-
+mess = bitify(message2)
+blocks = blockify(mess)
 blocks = padify(blocks)
+blocks = depadify(blocks)
 
-for i in blocks:
-     print(i)
+mess = deblockify(blocks)
 
-
-
+mess = debitify(mess)
+print(mess)
 
 
