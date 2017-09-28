@@ -2,7 +2,7 @@
 
 import binascii
 import os
-
+#from Crypto.Cipher import AES
 
 def bitify(message, encoding='utf-8', errors='surrogatepass'):
     bits = bin(int(binascii.hexlify(message.encode(encoding, errors)), 16))[2:]
@@ -68,7 +68,16 @@ def depadify(blocks):
         blocks[-1] = last[:-trim]
         return blocks
 
-
+def cbc_encrypt(message,iv,hexkey):
+    key = binascii.unhexlify(hexkey)
+    if iv == 0:
+        iv = genIV()
+	blocks = blockify(bitify(message))
+	blocks = padify(blocks)
+	cblocks = []
+    for i in blocks:
+		cblock = xorify(i,iv)
+        
 message1 = "when pizzas on a bagel you can eat pizza anytime"
 
 message2 = "abcafdsgdsgdsgdsa"
@@ -81,6 +90,8 @@ blocks = depadify(blocks)
 mess = deblockify(blocks)
 
 mess = debitify(mess)
-print(mess)
 
 
+key = "68656c6c6f7468657265"
+key = binascii.unhexlify(key)
+print(key)
