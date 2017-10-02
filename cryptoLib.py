@@ -2,31 +2,28 @@
 
 import binascii
 import os
-#from Crypto.Cipher import AES
+from Crypto.Cipher import AES
+import operator
 
-def bitify(message, encoding='utf-8', errors='surrogatepass'):
-    bits = bin(int(binascii.hexlify(message.encode(encoding, errors)), 16))[2:]
-    return bits.zfill(8 * ((len(bits) + 7) // 8))
+def hexify(message):
+    return binascii.hexlify(bytearray(message)).decode('utf-8')
 
-def debitify(bits, encoding='utf-8', errors='surrogatepass'):
-    n = int(bits, 2)
-    hexs = '%x' % n
-    i = len(hexs)
-    binary = binascii.unhexlify(hexs.zfill(i + (i & 1)))
-    return binary.decode(encoding, errors)
-        
+def dehexify(hext):
+    text = binascii.unhexlify(hext)
+    return text.decode('utf-8')
+
 def xorify(block, iv):
-    return '{0:b}'.format(int(block,2) ^ int(iv,2))
-    
+    result = "%x" % (int(block.encode('hex'), 16) ^ int(iv.encode('hex'),16))
+    return result.decode('hex')
+
 def genIV():
-    iv = binascii.hexlify(os.urandom(8))
-    return bitify(iv)
+    return os.urandom(8) 
 
 def blockify(message):
     blocks = []
     while message:
-        blocks.append(message[:128])
-        message = message[128:]
+        blocks.append(message[:16])
+        message = message[16:]
     return blocks
 
 def deblockify(blocks):
@@ -39,59 +36,105 @@ def padify(blocks):
     need = 0
     padding = 0
     for i in blocks:
-        if len(i) < 128:
-            tot = 128 - len(i)
-            tot = tot / 8
+        if len(i) < 16:
+            tot = 16 - len(i)
+            tot = tot / 2
             padding = tot
             need = 1
     if need == 0:
-        pad = '{0:08b}'.format(16)
-        pad *= 16
+        pad = binascii.hexlify("8") 
+        pad *= 8
         blocks.append(pad)
         return blocks
     elif need == 1:
-        pad = '{0:08b}'.format(padding)
+        pad = binascii.hexlify(str(padding))
         pad *= padding
         blocks[-1] = blocks[-1] + pad
         return blocks
 
 def depadify(blocks):
     last = blocks[-1]
-    bits = last[-8:]
-    byte = int(bits,2)
-    #print(byte) 
+    hext = last[-2:]
+    byte = int(hext.decode('hex'))
     if byte == 16:
         blocks = blocks[:-1]
         return blocks    
     else:
-        trim = byte * 8
+        trim = byte * 2
         blocks[-1] = last[:-trim]
         return blocks
 
-def cbc_encrypt(message,iv,hexkey):
-    key = binascii.unhexlify(hexkey)
-    if iv == 0:
-        iv = genIV()
-	blocks = blockify(bitify(message))
-	blocks = padify(blocks)
-	cblocks = []
-    for i in blocks:
-		cblock = xorify(i,iv)
+def encrypt(key, raw):
+    '''
+    Takes in a string of clear text and encrypts it.
         
-message1 = "when pizzas on a bagel you can eat pizza anytime"
+    @param raw: a string of clear text
+    @return: a string of encrypted ciphertext
+    '''
+    if (raw is None) or (len(raw) == 0):
+        raise ValueError('input text cannot be null or empty set')
+    cipher = AES.AESCipher(key[:32], AES.MODE_ECB)
+    ciphertext = cipher.encrypt(raw)
+    return  binascii.hexlify(bytearray(ciphertext)).decode('utf-8')
+    
+def decrypt(key, enc):
+    if (enc is None) or (len(enc) == 0):
+        raise ValueError('input text cannot be null or empty set')
+    enc = binascii.unhexlify(enc)
+    cipher = AES.AESCipher(key[:32], AES.MODE_ECB)
+    enc = cipher.decrypt(enc)
+    return enc.decode('utf-8')
 
-message2 = "abcafdsgdsgdsgdsa"
+def cbc_encrypt(message,iv,key):
+    ciblocks = []
+    ciblocks.append(iv)
+    newiv = iv
+    bitmess = hexify(message)
+    blocks = blockify(bitmess)
+    blocks = padify(blocks)
+    for block in blocks:
+        block = block.decode('hex')
+        ciblock = xorify(block,newiv)
+        print(ciblock)
+        ciblock = hexify(ciblock)
+        print(ciblock)
+        ciphertext = encrypt(key,ciblock)
+        ciblocks.append(ciphertext)
+        newiv = ciphertext.decode('hex')
+    return ciblocks
 
-mess = bitify(message2)
-blocks = blockify(mess)
-blocks = padify(blocks)
-blocks = depadify(blocks)
+def test1():
+    message = "when pizzas on a bagel you can eat pizza anytime!"
 
-mess = deblockify(blocks)
+    message = hexify(message)
 
-mess = debitify(mess)
+    blocks = blockify(message)
+    blocks = padify(blocks)
 
+    for i in blocks:
+        print(i)
+    print('')
+    blocks = depadify(blocks)
 
-key = "68656c6c6f7468657265"
-key = binascii.unhexlify(key)
-print(key)
+    for i in blocks:
+        print(i)
+
+    messagenow = deblockify(blocks)
+
+    print(messagenow)
+    messagenow = dehexify(messagenow)
+    print(messagenow)
+
+#test1()
+
+def test2():
+    message = "thisisit"
+    iv = genIV()
+    print(message)
+    print(iv)
+    iv = iv.decode('hex')
+    result = xorify(message,iv)
+    print(result)
+    result = xorify(result,iv)
+    print(result) 
+#test2()
