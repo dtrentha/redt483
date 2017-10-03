@@ -12,13 +12,18 @@ def dehexify(hext):
     text = binascii.unhexlify(hext)
     return text.decode('utf-8')
 
+#XOR two raw byte strings
 def xorify(block, iv):
     result = "%x" % (int(block.encode('hex'), 16) ^ int(iv.encode('hex'),16))
-    return result.strip().decode('hex')
+    result = format(result,'0>32')
+    result = result.strip().decode('hex')
+    return result
 
+#Generate an IV in raw bytes
 def genIV():
     return os.urandom(16) 
 
+#Takes a message of plain text and breaks it into blocks of 128 bits.
 def blockify(message):
     blocks = []
     while message:
@@ -26,12 +31,14 @@ def blockify(message):
         message = message[16:]
     return blocks
 
+#Takes blocks of 128 bits and turns it into a single string.
 def deblockify(blocks):
     message = ""
     for i in blocks:
         message += i
     return message
 
+#Pads the blocks of the message with int converted into chars.
 def padify(blocks):
     need = 0
     padding = 0
@@ -48,6 +55,7 @@ def padify(blocks):
         blocks[-1] = blocks[-1] + pad
         return blocks
 
+#Takes off the padding.
 def depadify(blocks):
     last = blocks[-1]
     bytei = last[-2:]
@@ -80,62 +88,33 @@ def decrypt(key, enc):
     enc = binascii.unhexlify(enc)
     cipher = AES.AESCipher(key[:32], AES.MODE_ECB)
     enc = cipher.decrypt(enc)
-    return enc.decode('utf-8')
+    return enc
 
-def cbc_encrypt(message,iv,key):
+def cbc_enc(message,iv,key):
     ciblocks = []
-    ciblocks.append(iv)
+    ciblocks.append(hexify(iv))
     newiv = iv
-    bitmess = hexify(message)
-    blocks = blockify(bitmess)
+    blocks = blockify(message)
     blocks = padify(blocks)
-    for block in blocks:
-        block = block.decode('hex')
-        ciblock = xorify(block,newiv)
-        print(ciblock)
-        ciblock = hexify(ciblock)
-        print(ciblock)
+    for i in blocks:
+        ciblock = xorify(i,newiv)
         ciphertext = encrypt(key,ciblock)
         ciblocks.append(ciphertext)
-        newiv = ciphertext.decode('hex')
+        ciphertext = binascii.unhexlify(ciphertext)
+        newiv = ciphertext
     return ciblocks
 
-def test1():
-    message = b'when pizzas on a'
-    
-    key = b'Sixteen byte key'
-    iv = genIV()
-    
-    res = xorify(message,iv)
-    
-    cipher = AES.AESCipher(key[:32], AES.MODE_ECB)
-    ciphertext = cipher.encrypt(res)
-    result = binascii.hexlify(bytearray(ciphertext)).decode('utf-8')
-    
-    enc = binascii.unhexlify(result)
-    cipher = AES.AESCipher(key[:32], AES.MODE_ECB)
-    enc = cipher.decrypt(enc)
-   
-    mess = xorify(enc,iv)
-   
-    print(mess)
-
-#test1()
-    
-def test2():
-
-    message = b'when pizzas on a bagel you can eat pizza anytime!!'
-    blocks = blockify(message)
-
-    for i in blocks:
-        print(i)    
-    blocks = padify(blocks)
-    
-    for i in blocks:
-        print(len(i))
-    
-    blocks = depadify(blocks)
-    for i in blocks:
-        print(i)
-        print(len(i))
-test2()
+def cbc_dec(ciblocks,key):
+    dec = []
+    ciblocks.reverse()
+    num = len(ciblocks)
+    for i in range(num - 1):
+        hext = ciblocks[0]
+        iv = binascii.unhexlify(ciblocks[1])
+        decblock = decrypt(key, hext)
+        decblock = xorify(decblock,iv)
+        dec.insert(0, decblock)
+        del ciblocks[0] 
+    dec = depadify(dec)
+    message = deblockify(dec)
+    return message
