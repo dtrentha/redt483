@@ -14,10 +14,10 @@ def dehexify(hext):
 
 def xorify(block, iv):
     result = "%x" % (int(block.encode('hex'), 16) ^ int(iv.encode('hex'),16))
-    return result.decode('hex')
+    return result.strip().decode('hex')
 
 def genIV():
-    return os.urandom(8) 
+    return os.urandom(16) 
 
 def blockify(message):
     blocks = []
@@ -38,31 +38,28 @@ def padify(blocks):
     for i in blocks:
         if len(i) < 16:
             tot = 16 - len(i)
-            tot = tot / 2
-            padding = tot
             need = 1
     if need == 0:
-        pad = binascii.hexlify("8") 
-        pad *= 8
+        pad = chr(16) * 16 
         blocks.append(pad)
         return blocks
     elif need == 1:
-        pad = binascii.hexlify(str(padding))
-        pad *= padding
+        pad = chr(tot) * tot
         blocks[-1] = blocks[-1] + pad
         return blocks
 
 def depadify(blocks):
     last = blocks[-1]
-    hext = last[-2:]
-    byte = int(hext.decode('hex'))
+    bytei = last[-2:]
+    byte = ord(last[-2])
     if byte == 16:
         blocks = blocks[:-1]
         return blocks    
     else:
-        trim = byte * 2
+        trim = byte
         blocks[-1] = last[:-trim]
         return blocks
+
 
 def encrypt(key, raw):
     '''
@@ -104,37 +101,41 @@ def cbc_encrypt(message,iv,key):
     return ciblocks
 
 def test1():
-    message = "when pizzas on a bagel you can eat pizza anytime!"
-
-    message = hexify(message)
-
-    blocks = blockify(message)
-    blocks = padify(blocks)
-
-    for i in blocks:
-        print(i)
-    print('')
-    blocks = depadify(blocks)
-
-    for i in blocks:
-        print(i)
-
-    messagenow = deblockify(blocks)
-
-    print(messagenow)
-    messagenow = dehexify(messagenow)
-    print(messagenow)
+    message = b'when pizzas on a'
+    
+    key = b'Sixteen byte key'
+    iv = genIV()
+    
+    res = xorify(message,iv)
+    
+    cipher = AES.AESCipher(key[:32], AES.MODE_ECB)
+    ciphertext = cipher.encrypt(res)
+    result = binascii.hexlify(bytearray(ciphertext)).decode('utf-8')
+    
+    enc = binascii.unhexlify(result)
+    cipher = AES.AESCipher(key[:32], AES.MODE_ECB)
+    enc = cipher.decrypt(enc)
+   
+    mess = xorify(enc,iv)
+   
+    print(mess)
 
 #test1()
-
+    
 def test2():
-    message = "thisisit"
-    iv = genIV()
-    print(message)
-    print(iv)
-    iv = iv.decode('hex')
-    result = xorify(message,iv)
-    print(result)
-    result = xorify(result,iv)
-    print(result) 
-#test2()
+
+    message = b'when pizzas on a bagel you can eat pizza anytime!!'
+    blocks = blockify(message)
+
+    for i in blocks:
+        print(i)    
+    blocks = padify(blocks)
+    
+    for i in blocks:
+        print(len(i))
+    
+    blocks = depadify(blocks)
+    for i in blocks:
+        print(i)
+        print(len(i))
+test2()
