@@ -154,7 +154,7 @@ def main():
     
     if mode == "cbc-enc":
         
-        message = ifile.read().replace('\n', '')
+        message = ifile.read()
         blocks = cbc_enc(message,iv,key)
         
         for i in blocks:
@@ -170,7 +170,7 @@ def main():
 
     elif mode == "ctr-enc":
         
-        message = ifile.read().replace('\n', '')
+        message = ifile.read()
         blocks = ctr_enc(message,iv,key)
      
         for i in blocks:
