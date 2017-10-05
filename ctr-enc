@@ -1,0 +1,2 @@
+#!/bin/bash
+python cryptoLib.py ctr-enc $@

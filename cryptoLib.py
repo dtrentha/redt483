@@ -123,22 +123,23 @@ def cbc_dec(ciblocks,key):
 
 def main():
     blocks = []
-
-    mode = sys.argv[1]
+ 
     parser = argparse.ArgumentParser()
+    parser.add_argument('mode')
     parser.add_argument('-k')
     parser.add_argument('-i')
     parser.add_argument('-o')
     parser.add_argument('-v', nargs ='?')
-
+    
     args = parser.parse_args()
-
+    
+    mode = args.mode
+  
     kfile = open(args.k)
     key = kfile.readline()
     key = key.rstrip('\n')
 
     ifile = open(args.i, 'r')
-    blocks = ifile.readlines()
 
     output = open(args.o, 'w')
 
@@ -148,7 +149,7 @@ def main():
         iv = iv.rstrip('\n')
         iv = iv.decode('hex')
     else:
-        iv = cryptoLib.genIV()
+        iv = genIV()
 
     
     if mode == "cbc-enc":
@@ -162,10 +163,12 @@ def main():
     elif mode == "cbc-dec":
         
         blocks = ifile.readlines()
+        for i in range(len(blocks)):
+            blocks[i] = blocks[i].strip('\n')
         message = cbc_dec(blocks, key)
         output.write(message)
 
-    elif mode == "ctr-enc"
+    elif mode == "ctr-enc":
         
         message = ifile.read().replace('\n', '')
         blocks = ctr_enc(message,iv,key)
@@ -176,12 +179,14 @@ def main():
     elif mode == "ctr-dec":
         
         blocks = ifile.readlines()
+        for i in range(len(blocks)):
+            blocks[i] = blocks[i].strip('\n')
         message = ctr_dec(blocks,key)
         output.write(message)
 
     else:
-        print("not a valid mode")
-        
+        print("Not a valid mode")
+        return
 
 if __name__ == "__main__":
      main()
