@@ -2,8 +2,10 @@
 
 import binascii
 import os
+import sys
+import argparse
 from Crypto.Cipher import AES
-import operator
+
 
 def hexify(message):
     return binascii.hexlify(bytearray(message)).decode('utf-8')
@@ -118,3 +120,69 @@ def cbc_dec(ciblocks,key):
     dec = depadify(dec)
     message = deblockify(dec)
     return message
+
+def main():
+    blocks = []
+
+    mode = sys.argv[1]
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-k')
+    parser.add_argument('-i')
+    parser.add_argument('-o')
+    parser.add_argument('-v', nargs ='?')
+
+    args = parser.parse_args()
+
+    kfile = open(args.k)
+    key = kfile.readline()
+    key = key.rstrip('\n')
+
+    ifile = open(args.i, 'r')
+    blocks = ifile.readlines()
+
+    output = open(args.o, 'w')
+
+    if args.v != None:
+        ivfile = open(args.v)
+        iv = ivfile.readline()
+        iv = iv.rstrip('\n')
+        iv = iv.decode('hex')
+    else:
+        iv = cryptoLib.genIV()
+
+    
+    if mode == "cbc-enc":
+        
+        message = ifile.read().replace('\n', '')
+        blocks = cbc_enc(message,iv,key)
+        
+        for i in blocks:
+            output.write("%s\n" % i)
+
+    elif mode == "cbc-dec":
+        
+        blocks = ifile.readlines()
+        message = cbc_dec(blocks, key)
+        output.write(message)
+
+    elif mode == "ctr-enc"
+        
+        message = ifile.read().replace('\n', '')
+        blocks = ctr_enc(message,iv,key)
+     
+        for i in blocks:
+            output.write("%s\n" % i)
+
+    elif mode == "ctr-dec":
+        
+        blocks = ifile.readlines()
+        message = ctr_dec(blocks,key)
+        output.write(message)
+
+    else:
+        print("not a valid mode")
+        
+
+if __name__ == "__main__":
+     main()
+
