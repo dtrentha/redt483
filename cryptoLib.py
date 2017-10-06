@@ -5,7 +5,9 @@ import os
 import sys
 import argparse
 from Crypto.Cipher import AES
-
+import multiprocessing
+#from joblib import Parallel, delayed
+multi = multiprocessing
 
 def hexify(message):
     return binascii.hexlify(bytearray(message)).decode('utf-8')
@@ -121,6 +123,65 @@ def cbc_dec(ciblocks,key):
     message = deblockify(dec)
     return message
 
+def multi_process(key, ctrs, blocks, index):
+    ctr = binascii.unhexlify(encrypt(key, ctrs[index]))
+    block = blocks[index]
+    result = xorify(block, ctr)
+    ctrs[index] = hexify(result)
+    return ctrs
+
+def ctr_enc(message, iv, key):
+    
+    blocks = blockify(message)
+    trim = len(blocks[-1])
+    trim = (16 - trim) * 2
+    blocks.insert(0,'0')   #added this to make blocks and ciblocks the same length
+    ciblocks = []
+    
+    ciblocks.append(hexify(iv))
+  
+    for i in range(1,len(blocks)):
+        iv = binascii.unhexlify(format("%x" % (int(iv.encode('hex'), 16) + 1),'0>32'))
+        ciblocks.append(iv)
+  
+      
+    cpus = multi.cpu_count()
+
+    for index in range(1, len(ciblocks)):
+        multi_process(key, ciblocks, blocks, index) 
+    last = ciblocks[-1]
+    ciblocks[-1] = last[:-trim]  
+    return ciblocks
+ 
+def ctr_dec(ciblocks, key):
+    iv = binascii.unhexlify(ciblocks[0])
+    blocks = []
+    trim = len(ciblocks[-1])
+    trim = (32 - trim) / 2 
+    trim += 1
+    blocks.append(iv)
+ 
+    for i in range(1,len(ciblocks)):
+        iv = binascii.unhexlify(format("%x" % (int(iv.encode('hex'), 16) + 1),'0>32'))
+        blocks.append(iv)
+        ciblocks[i] = binascii.unhexlify(ciblocks[i])
+    
+    cpus = multi.cpu_count()
+
+    for index in range(1, len(blocks)):
+        multi_process(key,blocks, ciblocks, index)
+    
+    del blocks[0]
+    
+    for i in range(len(blocks)):
+        blocks[i] = binascii.unhexlify(blocks[i])
+    
+    last = blocks[-1]
+    blocks[-1] = last[:-trim]
+    message = deblockify(blocks)
+    print(len(message))
+    return message    
+
 def main():
     blocks = []
  
@@ -138,6 +199,7 @@ def main():
     kfile = open(args.k)
     key = kfile.readline()
     key = key.rstrip('\n')
+    key = key.decode('hex')
 
     ifile = open(args.i, 'r')
 
