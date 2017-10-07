@@ -173,7 +173,7 @@ def ctr_dec(ciblocks, key):
         blocks[i] = binascii.unhexlify(blocks[i])
     
     last = blocks[-1]
-    last = str(last, 'UTF8')
+    last = str(last)
     last = last.strip('\x00')
     last = bytes(last, encoding = 'utf-8')
   
