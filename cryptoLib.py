@@ -53,7 +53,7 @@ def padify(blocks):
         blocks.append(pad)
         return blocks
     elif need == 1:
-        pad = chr(tot) * tot
+        pad = tot.to_bytes(1, byteorder= 'big', signed = False)  * tot
         blocks[-1] = blocks[-1] + pad
         return blocks
 
