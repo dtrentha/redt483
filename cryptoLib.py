@@ -35,7 +35,7 @@ def blockify(message):
 
 #Takes blocks of 128 bits and turns it into a single string.
 def deblockify(blocks):
-    message = ""
+    message = bytes('', encoding='utf-8')
     for i in blocks:
         message += i
     return message
