@@ -153,17 +153,12 @@ def ctr_enc(message, iv, key):
     ciblocks = p.apply(multi_process,args=(key,ciblocks,blocks,))
     
     p.close()
-    #last = ciblocks[-1]
-    #ciblocks[-1] = last[:-trim]  
     return ciblocks
  
 def ctr_dec(ciblocks, key):
     iv = binascii.unhexlify(ciblocks[0])
     blocks = []
-    #trim = len(ciblocks[-1])
-    print(trim)
-    #trim = (32 - trim) / 2 
-    #trim += 1
+ 
     blocks.append(iv)
  
     for i in range(1,len(ciblocks)):
@@ -182,15 +177,6 @@ def ctr_dec(ciblocks, key):
     for i in range(len(blocks)):
         blocks[i] = binascii.unhexlify(blocks[i])
  
-    #print(trim)
-    #trim = int(trim)
-    #print(trim) 
-    #last = blocks[-1]
-    #last = str(last)
-    #last = last[:-trim]
-    #last = bytes(last, encoding = 'utf-8')
-  
-    #blocks[-1] = last
     message = deblockify(blocks)
     return message    
 
