@@ -214,8 +214,8 @@ def main():
     
     if mode == "cbc-enc":
         
-        #message = bytes('', encoding='utf-8')
-        message = ''
+        message = bytes('', encoding='utf-8')
+        #message = ''
         for line in ifile:
             message += line
         blocks = cbc_enc(message,iv,key)
@@ -233,8 +233,8 @@ def main():
 
     elif mode == "ctr-enc":
         
-        #message = bytes('', encoding='utf-8')
-        message = ''
+        message = bytes('', encoding='utf-8')
+        #message = ''
         for line in ifile:
             message += line
         blocks = ctr_enc(message,iv,key)
