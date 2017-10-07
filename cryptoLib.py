@@ -60,8 +60,7 @@ def padify(blocks):
 #Takes off the padding.
 def depadify(blocks):
     last = blocks[-1]
-    byte = last[-2:]
-    byte = last[-2]
+    byte = int.from_bytes((last[-2]),byteorder='big', signed = False)
     if byte == 16:
         blocks = blocks[:-1]
         return blocks    
@@ -199,7 +198,6 @@ def main():
     key = key.rstrip('\n')
     key = binascii.unhexlify(key)
 
-  
 
     if args.v != None:
         ivfile = open(args.v)
