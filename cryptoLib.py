@@ -201,7 +201,7 @@ def main():
 
     ifile = open(args.i, 'rb')
 
-    output = open(args.o, 'wb')
+    output = open(args.o, 'w')
 
     if args.v != None:
         ivfile = open(args.v)
