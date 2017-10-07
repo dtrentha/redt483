@@ -199,9 +199,9 @@ def main():
     key = key.rstrip('\n')
     key = binascii.unhexlify(key)
 
-    ifile = open(args.i, 'r')
+    ifile = open(args.i, 'rb')
 
-    output = open(args.o, 'w')
+    output = open(args.o, 'wb')
 
     if args.v != None:
         ivfile = open(args.v)
@@ -214,7 +214,10 @@ def main():
     
     if mode == "cbc-enc":
         
-        message = ifile.read()
+        #message = bytes('', encoding='utf-8')
+        message = ''
+        for line in ifile:
+            message += line
         blocks = cbc_enc(message,iv,key)
         
         for i in blocks:
@@ -230,7 +233,10 @@ def main():
 
     elif mode == "ctr-enc":
         
-        message = ifile.read()
+        #message = bytes('', encoding='utf-8')
+        message = ''
+        for line in ifile:
+            message += line
         blocks = ctr_enc(message,iv,key)
      
         for i in blocks:
