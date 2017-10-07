@@ -199,9 +199,7 @@ def main():
     key = key.rstrip('\n')
     key = binascii.unhexlify(key)
 
-    ifile = open(args.i, 'rb')
-
-    output = open(args.o, 'w')
+  
 
     if args.v != None:
         ivfile = open(args.v)
@@ -213,7 +211,8 @@ def main():
 
     
     if mode == "cbc-enc":
-        
+        ifile = open(args.i, 'rb')
+        output = open(args.o, 'w')
         message = bytes('', encoding='utf-8')
         #message = ''
         for line in ifile:
@@ -224,7 +223,8 @@ def main():
             output.write("%s\n" % i)
 
     elif mode == "cbc-dec":
-        
+        ifile = open(args.i, 'r')
+        output = open(args.o, 'wb')
         blocks = ifile.readlines()
         for i in range(len(blocks)):
             blocks[i] = blocks[i].strip('\n')
