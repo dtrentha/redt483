@@ -2,6 +2,7 @@
 
 import binascii
 import os
+import operator
 import sys
 import argparse
 from Crypto.Cipher import AES
@@ -19,10 +20,11 @@ def xorify(block, iv):
     #result = "%x" % (int(binascii.hexlify(block), 16) ^ int(binascii.hexlify(iv),16))
     #result = format(result,'0>32')
     #result = binascii.unhexlify(result.strip())
-    int_block = int.from_bytes(block, byteorder = 'big', signed = False)
-    int_iv = int.from_bytes(iv, byteorder= 'big', signed = False)
-    x = int_block ^ int_iv
-    return x.to_bytes(len(block), byteorder= 'big', signed = False)
+    #int_block = int.from_bytes(block, byteorder = 'big', signed = False)
+    #int_iv = int.from_bytes(iv, byteorder= 'big', signed = False)
+    #x = int_block ^ int_iv
+    #return x.to_bytes(len(block), byteorder= 'big', signed = False)
+    return bytes(map(operator.xor, block, iv))
 
 #Generate an IV in raw bytes
 def genIV():
