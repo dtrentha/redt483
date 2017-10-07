@@ -16,10 +16,13 @@ def dehexify(hext):
 
 #XOR two raw byte strings
 def xorify(block, iv):
-    result = "%x" % (int(binascii.hexlify(block), 16) ^ int(binascii.hexlify(iv),16))
-    result = format(result,'0>32')
-    result = binascii.unhexlify(result.strip())
-    return result
+    #result = "%x" % (int(binascii.hexlify(block), 16) ^ int(binascii.hexlify(iv),16))
+    #result = format(result,'0>32')
+    #result = binascii.unhexlify(result.strip())
+    int_block = int.from_bytes(block, sys.byorder)
+    int_iv = int.from_bytes(iv, sys.byorder)
+    x = int_block ^ int_iv
+    return x.to_bytes(len(block), sys.byteorder)
 
 #Generate an IV in raw bytes
 def genIV():
@@ -131,8 +134,8 @@ def multi_process(key, ctrs, blocks):
 def ctr_enc(message, iv, key): 
     blocks = blockify(message)
     #blocks = padify(blocks)
-    trim = len(blocks[-1])
-    trim = (16 - trim) * 2
+    #trim = len(blocks[-1])
+    #trim = (16 - trim) * 2
     blocks.insert(0,'0')   #added this to make blocks and ciblocks the same length
     ciblocks = []
     
@@ -155,8 +158,8 @@ def ctr_dec(ciblocks, key):
     blocks = []
     trim = len(ciblocks[-1])
     print(trim)
-    trim = (32 - trim) / 2 
-    trim += 1
+    #trim = (32 - trim) / 2 
+    #trim += 1
     blocks.append(iv)
  
     for i in range(1,len(ciblocks)):
@@ -173,15 +176,15 @@ def ctr_dec(ciblocks, key):
     for i in range(len(blocks)):
         blocks[i] = binascii.unhexlify(blocks[i])
  
-    print(trim)
-    trim = int(trim)
-    print(trim) 
-    last = blocks[-1]
-    last = str(last)
-    last = last[:-trim]
-    last = bytes(last, encoding = 'utf-8')
+    #print(trim)
+    #trim = int(trim)
+    #print(trim) 
+    #last = blocks[-1]
+    #last = str(last)
+    #last = last[:-trim]
+    #last = bytes(last, encoding = 'utf-8')
   
-    blocks[-1] = last
+    #blocks[-1] = last
     message = deblockify(blocks)
     return message    
 
