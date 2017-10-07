@@ -197,7 +197,7 @@ def main():
     kfile = open(args.k)
     key = kfile.readline()
     key = key.rstrip('\n')
-    key = key.decode('hex')
+    key = binascii.unhexlify(key)
 
     ifile = open(args.i, 'r')
 
@@ -207,7 +207,7 @@ def main():
         ivfile = open(args.v)
         iv = ivfile.readline()
         iv = iv.rstrip('\n')
-        iv = iv.decode('hex')
+        iv = binascii.unhexlify(iv)
     else:
         iv = genIV()
 
