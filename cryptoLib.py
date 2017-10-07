@@ -155,7 +155,7 @@ def ctr_dec(ciblocks, key):
     blocks = []
     trim = len(ciblocks[-1])
     trim = (32 - trim) / 2 
-    #trim += 1
+    trim += 1
     blocks.append(iv)
  
     for i in range(1,len(ciblocks)):
@@ -174,7 +174,7 @@ def ctr_dec(ciblocks, key):
     
     last = blocks[-1]
     last = str(last)
-    last = last.strip('\x00')
+    last = last[:-trim]
     last = bytes(last, encoding = 'utf-8')
   
     blocks[-1] = last
