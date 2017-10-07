@@ -154,6 +154,7 @@ def ctr_dec(ciblocks, key):
     iv = binascii.unhexlify(ciblocks[0])
     blocks = []
     trim = len(ciblocks[-1])
+    print(trim)
     trim = (32 - trim) / 2 
     trim += 1
     blocks.append(iv)
