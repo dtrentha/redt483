@@ -171,7 +171,10 @@ def ctr_dec(ciblocks, key):
     
     for i in range(len(blocks)):
         blocks[i] = binascii.unhexlify(blocks[i])
-    
+ 
+    print(trim)
+    trim = int(trim)
+    print(trim) 
     last = blocks[-1]
     last = str(last)
     last = last[:-trim]
