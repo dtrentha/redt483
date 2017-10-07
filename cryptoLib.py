@@ -19,10 +19,10 @@ def xorify(block, iv):
     #result = "%x" % (int(binascii.hexlify(block), 16) ^ int(binascii.hexlify(iv),16))
     #result = format(result,'0>32')
     #result = binascii.unhexlify(result.strip())
-    int_block = int.from_bytes(block, sys.byorder)
-    int_iv = int.from_bytes(iv, sys.byorder)
+    int_block = int.from_bytes(block, byorder = 'big')
+    int_iv = int.from_bytes(iv, byorder = 'big')
     x = int_block ^ int_iv
-    return x.to_bytes(len(block), sys.byteorder)
+    return x.to_bytes(len(block), byteorder= 'big')
 
 #Generate an IV in raw bytes
 def genIV():
@@ -156,7 +156,7 @@ def ctr_enc(message, iv, key):
 def ctr_dec(ciblocks, key):
     iv = binascii.unhexlify(ciblocks[0])
     blocks = []
-    trim = len(ciblocks[-1])
+    #trim = len(ciblocks[-1])
     print(trim)
     #trim = (32 - trim) / 2 
     #trim += 1
