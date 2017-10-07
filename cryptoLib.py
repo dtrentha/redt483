@@ -16,9 +16,9 @@ def dehexify(hext):
 
 #XOR two raw byte strings
 def xorify(block, iv):
-    result = "%x" % (int(block.encode('hex'), 16) ^ int(iv.encode('hex'),16))
+    result = "%x" % (int(binascii.hexlify(block), 16) ^ int(binascii.hexlify(iv),16))
     result = format(result,'0>32')
-    result = result.strip().decode('hex')
+    result = binascii.unhexlify(result.strip())
     return result
 
 #Generate an IV in raw bytes
