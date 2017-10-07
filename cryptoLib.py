@@ -60,7 +60,7 @@ def padify(blocks):
 #Takes off the padding.
 def depadify(blocks):
     last = blocks[-1]
-    byte = int.from_bytes((last[-2]),byteorder='big', signed = False)
+    byte = int(last[-2])
     if byte == 16:
         blocks = blocks[:-1]
         return blocks    
