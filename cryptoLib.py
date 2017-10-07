@@ -174,7 +174,6 @@ def ctr_dec(ciblocks, key):
     
     last = blocks[-1]
     last = str(last, 'UTF8')
-    print(last)
     last = last.strip('\x00')
     last = bytes(last, encoding = 'utf-8')
   
