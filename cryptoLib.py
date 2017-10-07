@@ -24,6 +24,8 @@ def xorify(block, iv):
     #int_iv = int.from_bytes(iv, byteorder= 'big', signed = False)
     #x = int_block ^ int_iv
     #return x.to_bytes(len(block), byteorder= 'big', signed = False)
+     
+    #This finally worked!!!!
     return bytes(map(operator.xor, block, iv))
 
 #Generate an IV in raw bytes
@@ -135,9 +137,6 @@ def multi_process(key, ctrs, blocks):
 
 def ctr_enc(message, iv, key): 
     blocks = blockify(message)
-    #blocks = padify(blocks)
-    #trim = len(blocks[-1])
-    #trim = (16 - trim) * 2
     blocks.insert(0,'0')   #added this to make blocks and ciblocks the same length
     ciblocks = []
     
@@ -213,7 +212,6 @@ def main():
         ifile = open(args.i, 'rb')
         output = open(args.o, 'w')
         message = bytes('', encoding='utf-8')
-        #message = ''
         for line in ifile:
             message += line
         blocks = cbc_enc(message,iv,key)
@@ -234,7 +232,6 @@ def main():
         ifile = open(args.i, 'rb')
         output = open(args.o, 'w') 
         message = bytes('', encoding='utf-8')
-        #message = ''
         for line in ifile:
             message += line
         blocks = ctr_enc(message,iv,key)
