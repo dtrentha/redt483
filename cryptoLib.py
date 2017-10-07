@@ -173,7 +173,7 @@ def ctr_dec(ciblocks, key):
         blocks[i] = binascii.unhexlify(blocks[i])
     
     last = blocks[-1]
-    last = last.strip('\x00')
+    last = last.rstrip('\x00')
   
     blocks[-1] = last
     message = deblockify(blocks)
