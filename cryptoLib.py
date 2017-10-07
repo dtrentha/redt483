@@ -129,9 +129,9 @@ def multi_process(key, ctrs, blocks):
         ctrs[index] = hexify(result)
     return ctrs
 
-def ctr_enc(message, iv, key):
-    
+def ctr_enc(message, iv, key): 
     blocks = blockify(message)
+    #blocks = padify(blocks)
     trim = len(blocks[-1])
     trim = (16 - trim) * 2
     blocks.insert(0,'0')   #added this to make blocks and ciblocks the same length
@@ -147,8 +147,8 @@ def ctr_enc(message, iv, key):
     ciblocks = p.apply(multi_process,args=(key,ciblocks,blocks,))
     
     p.close()
-    last = ciblocks[-1]
-    ciblocks[-1] = last[:-trim]  
+    #last = ciblocks[-1]
+    #ciblocks[-1] = last[:-trim]  
     return ciblocks
  
 def ctr_dec(ciblocks, key):
@@ -156,7 +156,7 @@ def ctr_dec(ciblocks, key):
     blocks = []
     trim = len(ciblocks[-1])
     trim = (32 - trim) / 2 
-    trim += 1
+    #trim += 1
     blocks.append(iv)
  
     for i in range(1,len(ciblocks)):
@@ -164,8 +164,7 @@ def ctr_dec(ciblocks, key):
         blocks.append(iv)
         ciblocks[i] = binascii.unhexlify(ciblocks[i])
     
-
-
+    
     p = Pool()
     blocks = p.apply(multi_process,args=(key,blocks,ciblocks,))
     p.close() 
@@ -175,9 +174,10 @@ def ctr_dec(ciblocks, key):
         blocks[i] = binascii.unhexlify(blocks[i])
     
     last = blocks[-1]
-    blocks[-1] = last[:-trim]
+    last = last.strip('\x00')
+  
+    blocks[-1] = last
     message = deblockify(blocks)
-    
     return message    
 
 def main():
