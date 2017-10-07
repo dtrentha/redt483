@@ -142,7 +142,9 @@ def ctr_enc(message, iv, key):
     ciblocks.append(hexify(iv))
   
     for i in range(1,len(blocks)):
-        iv = binascii.unhexlify(format("%x" % (int(binascii.hexlify(iv), 16) + 1),'0>32'))
+        #iv = binascii.unhexlify(format("%x" % (int(binascii.hexlify(iv), 16) + 1),'0>32'))
+        ivint = int.from_bytes(iv, byteorder = 'big', signed = False) + 1
+        iv = ivint.to_bytes(len(iv), byteoder = 'big', signed = False)
         ciblocks.append(iv)
   
     p = Pool()
@@ -163,7 +165,9 @@ def ctr_dec(ciblocks, key):
     blocks.append(iv)
  
     for i in range(1,len(ciblocks)):
-        iv = binascii.unhexlify(format("%x" % (int(binascii.hexlify(iv), 16) + 1),'0>32'))
+        #iv = binascii.unhexlify(format("%x" % (int(binascii.hexlify(iv), 16) + 1),'0>32'))
+        ivint = int.from_bytes(iv, byteorder = 'big', signed = False) + 1
+        iv = ivint.to_bytes(len(iv), byteoder = 'big', signed = False)
         blocks.append(iv)
         ciblocks[i] = binascii.unhexlify(ciblocks[i])
     
