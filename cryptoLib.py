@@ -139,7 +139,7 @@ def ctr_enc(message, iv, key):
     ciblocks.append(hexify(iv))
   
     for i in range(1,len(blocks)):
-        iv = binascii.unhexlify(format("%x" % (int(iv.encode('hex'), 16) + 1),'0>32'))
+        iv = binascii.unhexlify(format("%x" % (int(binascii.hexlify(iv), 16) + 1),'0>32'))
         ciblocks.append(iv)
   
     p = Pool()
